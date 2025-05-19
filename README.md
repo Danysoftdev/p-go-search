@@ -86,8 +86,7 @@ Hola, desde la creación de personas
   "direccion": "Cra 1 #1-1"
 }
 
-
----
+```
 
 ## 🧪 Ejecución de pruebas
 

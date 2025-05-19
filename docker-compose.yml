@@ -1,0 +1,25 @@
+services:
+  search-service:
+    image: danysoftdev/p-go-search:latest
+    container_name: microservicio-search
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - "8082:8080"
+    networks:
+      - parcial_go_mongo_net
+
+  tester:
+    image: curlimages/curl
+    depends_on:
+      - create-service
+    networks:
+      - parcial_go_mongo_net
+    entrypoint: [ "sh", "-c", "sleep 15 && curl -s --fail http://search-service:8080 || exit 1" ]
+    profiles:
+      - test
+
+networks:
+  parcial_go_mongo_net:
+    external: true
