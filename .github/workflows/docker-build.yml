@@ -53,7 +53,7 @@ jobs:
           echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
           echo "COLLECTION_NAME=${{ secrets.COLLECTION_NAME }}" >> .env
 
-      - name: 🔁 Run Docker Compose Integration Test (mongo and create-service)
+      - name: 🔁 Run Docker Compose Integration Test (mongo and search-service)
         run: |
           docker network create parcial_go_mongo_net || true
           docker compose -f docker-compose-mongo.yml -f docker-compose.yml --env-file .env --profile test up --abort-on-container-exit

@@ -13,7 +13,7 @@ services:
   tester:
     image: curlimages/curl
     depends_on:
-      - create-service
+      - search-service
     networks:
       - parcial_go_mongo_net
     entrypoint: [ "sh", "-c", "sleep 15 && curl -s --fail http://search-service:8080 || exit 1" ]
