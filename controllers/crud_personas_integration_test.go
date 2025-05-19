@@ -5,7 +5,6 @@ package controllers_test
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -17,7 +16,6 @@ import (
 
 	"github.com/danysoftdev/p-go-search/config"
 	"github.com/danysoftdev/p-go-search/controllers"
-	"github.com/danysoftdev/p-go-search/models"
 	"github.com/danysoftdev/p-go-search/repositories"
 	"github.com/danysoftdev/p-go-search/services"
 	"github.com/testcontainers/testcontainers-go"

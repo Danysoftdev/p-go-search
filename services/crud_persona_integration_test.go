@@ -68,6 +68,10 @@ func TestCrearBuscarActualizarEliminarPersona(t *testing.T) {
 		Direccion: "Calle Falsa 123",
 	}
 
+	// Crear
+	err = services.CrearPersona(persona)
+	assert.NoError(t, err)
+
 	// Buscar
 	encontrada, err := services.BuscarPersonaPorDocumento(persona.Documento)
 	assert.NoError(t, err)
