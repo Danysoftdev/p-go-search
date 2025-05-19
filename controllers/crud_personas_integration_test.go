@@ -13,18 +13,21 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
 
 	"github.com/danysoftdev/p-go-search/config"
 	"github.com/danysoftdev/p-go-search/controllers"
+	"github.com/danysoftdev/p-go-search/models"
 	"github.com/danysoftdev/p-go-search/repositories"
 	"github.com/danysoftdev/p-go-search/services"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
-func TestEndpointsControllerIntegration(t *testing.T) {
+func TestObtenerPersonaPorDocumento_Integration(t *testing.T) {
 	ctx := context.Background()
 
+	// 1. Levantar contenedor de MongoDB
 	req := testcontainers.ContainerRequest{
 		Image:        "mongo:6.0",
 		ExposedPorts: []string{"27017/tcp"},
@@ -51,17 +54,34 @@ func TestEndpointsControllerIntegration(t *testing.T) {
 	repositories.SetCollection(config.Collection)
 	services.SetPersonaRepository(repositories.RealPersonaRepository{})
 
-	// Setup router
-	router := mux.NewRouter()
+	// Limpiar colección
+	_, err = config.Collection.DeleteMany(ctx, bson.M{})
+	assert.NoError(t, err)
 
+	// Insertar persona directamente
+	persona := models.Persona{
+		Documento: "999",
+		Nombre:    "Lucía",
+		Apellido:  "Pérez",
+		Edad:      30,
+		Correo:    "lucia@example.com",
+		Telefono:  "3111234567",
+		Direccion: "Calle 123",
+	}
+	_, err = config.Collection.InsertOne(ctx, persona)
+	assert.NoError(t, err)
+
+	// 2. Configurar router y endpoint
+	router := mux.NewRouter()
 	router.HandleFunc("/personas/{documento}", controllers.ObtenerPersonaPorDocumento).Methods("GET")
 
-	// 3. Obtener por documento
+	// 3. Simular request al endpoint
 	reqBuscar := httptest.NewRequest("GET", "/personas/999", nil)
 	reqBuscar = mux.SetURLVars(reqBuscar, map[string]string{"documento": "999"})
 	resBuscar := httptest.NewRecorder()
 	router.ServeHTTP(resBuscar, reqBuscar)
 
+	// 4. Verificar respuesta esperada
 	assert.Equal(t, http.StatusOK, resBuscar.Code)
-
+	assert.Contains(t, resBuscar.Body.String(), "Lucía")
 }

@@ -17,12 +17,12 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func TestCrearBuscarActualizarEliminarPersona(t *testing.T) {
+func TestBuscarPersonaPorDocumento(t *testing.T) {
 	ctx := context.Background()
 
-	// 1. Iniciar contenedor de MongoDB
 	req := testcontainers.ContainerRequest{
 		Image:        "mongo:6.0",
 		ExposedPorts: []string{"27017/tcp"},
@@ -35,7 +35,6 @@ func TestCrearBuscarActualizarEliminarPersona(t *testing.T) {
 	assert.NoError(t, err)
 	defer mongoC.Terminate(ctx)
 
-	// 2. Obtener puerto dinámico y construir URI
 	endpoint, err := mongoC.Endpoint(ctx, "")
 	assert.NoError(t, err)
 
@@ -43,21 +42,18 @@ func TestCrearBuscarActualizarEliminarPersona(t *testing.T) {
 	t.Setenv("MONGO_DB", "testdb")
 	t.Setenv("COLLECTION_NAME", "personas_test")
 
-	// 3. Conectar a Mongo y cerrar después
 	err = config.ConectarMongo()
 	assert.NoError(t, err)
+	defer config.CerrarMongo()
 
 	repositories.SetCollection(config.Collection)
-
-	// Asegurarse de que la colección esté vacía antes de cada prueba
-	_, err = config.Collection.DeleteMany(context.Background(), bson.M{})
-	assert.NoError(t, err)
-
-
-	// 4. Inyectar el repositorio real al servicio
 	services.SetPersonaRepository(repositories.RealPersonaRepository{})
 
-	// 5. Crear persona de prueba
+	// Limpiar colección
+	_, err = config.Collection.DeleteMany(ctx, bson.M{})
+	assert.NoError(t, err)
+
+	// Insertar persona directamente
 	persona := models.Persona{
 		Documento: "12345",
 		Nombre:    "Persona",
@@ -67,15 +63,11 @@ func TestCrearBuscarActualizarEliminarPersona(t *testing.T) {
 		Telefono:  "3001234567",
 		Direccion: "Calle Falsa 123",
 	}
-
-	// Crear
-	err = services.CrearPersona(persona)
+	_, err = config.Collection.InsertOne(ctx, persona)
 	assert.NoError(t, err)
 
-	// Buscar
+	// Buscar desde el servicio
 	encontrada, err := services.BuscarPersonaPorDocumento(persona.Documento)
 	assert.NoError(t, err)
 	assert.Equal(t, "Persona", encontrada.Nombre)
-
-	defer config.CerrarMongo()
 }
