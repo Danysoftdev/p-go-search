@@ -9,6 +9,7 @@ kubectl apply -f k8s/search/namespace-search.yaml
 
 # Secret
 kubectl apply -f k8s/search/secrets-search.yaml
+kubectl apply -f k8s/search/dockerhub-secret.yaml
 
 # Deployment
 kubectl apply -f k8s/search/deployment-search.yaml

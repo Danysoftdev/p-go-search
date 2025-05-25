@@ -8,6 +8,8 @@ metadata:
 spec:
   nodeSelector:
     workload: search
+  imagePullSecrets:
+    - name: dockerhub-secret
   containers:
     - name: search-container
       image: danysoftdev/p-go-search:latest

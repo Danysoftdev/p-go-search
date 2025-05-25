@@ -20,3 +20,4 @@ vendor/
 
 # Secret files
 k8s/search/secrets-search.yaml
+k8s/search/dockerhub-secret.yaml
